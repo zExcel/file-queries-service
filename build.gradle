@@ -1,0 +1,49 @@
+plugins {
+	id 'org.springframework.boot' version '2.6.7'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+}
+
+group = 'com.walmart'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '8'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// AWS
+	implementation platform('software.amazon.awssdk:bom:2.15.0')
+	implementation 'software.amazon.awssdk:lambda'
+	implementation 'software.amazon.awssdk:s3'
+	implementation 'software.amazon.awscdk:aws-cdk-lib:2.21.1'
+	implementation 'software.constructs:constructs:[10.0.0,11.0.0)'
+
+
+	// Reactor
+	implementation 'io.projectreactor:reactor-core:3.4.17'
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// Sprint Boot
+	implementation 'org.springframework.boot:spring-boot-starter'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+task localRun {
+	bootRun { systemProperty "spring.profiles.active", "local" }
+}
+localRun.finalizedBy bootRun
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

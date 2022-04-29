@@ -1,5 +1,6 @@
-package com.walmart.filequeriesservice.models;
+package models;
 
+import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 
 public class RequestTests {
@@ -8,7 +9,8 @@ public class RequestTests {
 
     @Test
     public void listFilesDeserializesProperly() {
-        ListFilesRequest listFilesRequest = ListFilesRequest.requestFromJson(listFilesJson);
+        final Gson gson = new Gson();
+        ListFilesRequest listFilesRequest = ListFilesRequest.requestFromJson(listFilesJson, gson);
 
         assert(listFilesRequest.getName() != null);
         assert(listFilesRequest.getName().equals("testing"));

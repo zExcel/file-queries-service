@@ -24,10 +24,5 @@
       "name": "lambda.lambdaFilePath",
       "type": "java.lang.String",
       "description": "Directory of where all the Lambda Java files are stored."
-    },
-    {
-      "name": "lambda.lambdaFilePathPeriods",
-      "type": "java.lang.String",
-      "description": "Directory of where all the Lambda Java files are stored but with period formatting."
     }
   ] }

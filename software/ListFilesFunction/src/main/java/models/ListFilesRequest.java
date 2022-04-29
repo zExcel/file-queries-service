@@ -1,6 +1,6 @@
-package com.walmart.filequeriesservice.models;
+package models;
 
-import com.walmart.filequeriesservice.FileQueriesServiceConfiguration;
+import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -15,7 +15,7 @@ public class ListFilesRequest {
     private final String nameContains = null;
     private final String name = null;
 
-    public static ListFilesRequest requestFromJson(String json) {
-        return FileQueriesServiceConfiguration.getGson().fromJson(json, ListFilesRequest.class);
+    public static ListFilesRequest requestFromJson(final String json, final Gson gson) {
+        return gson.fromJson(json, ListFilesRequest.class);
     }
 }

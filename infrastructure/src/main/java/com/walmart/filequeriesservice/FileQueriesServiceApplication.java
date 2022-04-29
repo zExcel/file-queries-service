@@ -16,12 +16,10 @@ public class FileQueriesServiceApplication {
 		ConfigurableApplicationContext application = SpringApplication.run(FileQueriesServiceApplication.class, args);
 
 		GatewayConfigurationModule module = application.getBean(GatewayConfigurationModule.class);
-		System.out.println(module.getRedshiftUsername());
 
 		App app = new App();
 		new GatewayStack(app, "GatewayStack", StackProps.builder().build(), module);
 		app.synth();
-		System.out.println("FINISHED");
 	}
 
 }

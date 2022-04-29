@@ -1,0 +1,28 @@
+{
+  "properties": [
+    {
+      "name": "redshift.username",
+      "type": "java.lang.String",
+      "description": "Username used for the Redshift database."
+    },
+    {
+      "name": "gateway.listFilesPath",
+      "type": "java.lang.String",
+      "description": "Path in the Gateway API for the List Files function."
+    },
+    {
+      "name": "gateway.getFilePath",
+      "type": "java.lang.String",
+      "description": "Path in the Gateway API for the Get File function."
+    },
+    {
+      "name": "gateway.uploadFilePath",
+      "type": "java.lang.String",
+      "description": "Path in the Gateway API for the Upload File function."
+    },
+    {
+      "name": "lambda.lambdaFilePath",
+      "type": "java.lang.String",
+      "description": "Directory of where all the Lambda Java files are stored."
+    }
+  ] }

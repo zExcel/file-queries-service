@@ -4,46 +4,60 @@ plugins {
 	id 'java'
 }
 
-group = 'com.walmart'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '8'
+allprojects {
+	group = 'com.walmart'
+	version = '1.0'
 
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
+	apply plugin: 'java'
+	apply plugin: 'org.springframework.boot'
+	apply plugin: 'io.spring.dependency-management'
+
+	java {
+		toolchain {
+			languageVersion.set(JavaLanguageVersion.of(8))
+		}
 	}
-}
 
-repositories {
-	mavenCentral()
-}
+	compileJava {
+		sourceCompatibility = '1.8'
+		targetCompatibility = '1.8'
+	}
 
-dependencies {
-	// AWS
-	implementation platform('software.amazon.awssdk:bom:2.15.0')
-	implementation 'software.amazon.awssdk:lambda'
-	implementation 'software.amazon.awssdk:s3'
-	implementation 'software.amazon.awscdk:aws-cdk-lib:2.21.1'
-	implementation 'software.constructs:constructs:[10.0.0,11.0.0)'
+	wrapper {
+		gradleVersion = "7.4.2"
+		distributionType = Wrapper.DistributionType.ALL
+	}
+	repositories {
+		mavenCentral()
+	}
 
+	configurations {
+		compileOnly {
+			extendsFrom annotationProcessor
+		}
+	}
 
-	// Reactor
-	implementation 'io.projectreactor:reactor-core:3.4.17'
+	dependencies {
+		// Lombok
+		compileOnly 'org.projectlombok:lombok'
+		annotationProcessor 'org.projectlombok:lombok'
 
-	// Lombok
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
+		// Spring Boot
+		implementation 'org.springframework.boot:spring-boot-starter'
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-	// Sprint Boot
-	implementation 'org.springframework.boot:spring-boot-starter'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-}
+		// JUnit
+		testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+		testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
-task localRun {
-	bootRun { systemProperty "spring.profiles.active", "local" }
-}
-localRun.finalizedBy bootRun
+		// AWS
+		implementation platform('software.amazon.awssdk:bom:2.15.0')
+		implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.1000')
+		implementation 'software.amazon.awssdk:s3'
+		implementation 'com.amazonaws:aws-lambda-java-core:1.2.1'
+		implementation 'com.amazonaws:aws-lambda-java-events:3.11.0'
 
-tasks.named('test') {
-	useJUnitPlatform()
+		// JSON
+		implementation 'com.google.code.gson:gson:2.9.0'
+	}
 }

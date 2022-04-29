@@ -1,0 +1,23 @@
+plugins {
+	id 'org.springframework.boot' version '2.6.7'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+}
+
+apply plugin: 'java'
+
+subprojects {
+	dependencies {
+		// AWS
+		implementation platform('software.amazon.awssdk:bom:2.15.0')
+		implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.1000')
+		implementation 'software.amazon.awssdk:lambda'
+		implementation 'software.amazon.awssdk:s3'
+		implementation 'com.amazonaws:aws-lambda-java-core:1.2.1'
+		implementation 'com.amazonaws:aws-lambda-java-events:3.11.0'
+
+		// Shadow Jar Creation
+		compileOnly "org.springframework.cloud:spring-cloud-function-adapter-aws:3.2.2"
+	}
+}
+

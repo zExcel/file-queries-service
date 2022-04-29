@@ -1,0 +1,26 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
+
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'application'
+mainClassName='function.GetFile'
+
+assemble.dependsOn = [shadowJar]
+
+shadowJar {
+    dependencies {
+        exclude("org.springframework.cloud:spring-cloud-function-web:3.0.0.BUILD-SNAPSHOT")
+    }
+    // Required for Spring
+    mergeServiceFiles()
+    append 'META-INF/spring.handlers'
+    append 'META-INF/spring.schemas'
+    append 'META-INF/spring.tooling'
+    transform(PropertiesFileTransformer) {
+        paths = ['META-INF/spring.factories']
+        mergeStrategy = "append"
+    }
+}

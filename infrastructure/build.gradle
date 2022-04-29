@@ -1,0 +1,9 @@
+def CDK_VERSION = "1.151.0"
+
+apply plugin: "application"
+mainClassName='com.walmart.filequeriesservice.FileQueriesServiceApplication'
+
+dependencies {
+	// AWS
+	implementation "software.amazon.awscdk:aws-cdk-lib:2.22.0"
+}

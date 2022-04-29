@@ -1,8 +1,0 @@
-{
-  "properties": [
-    {
-      "name": "testing.test",
-      "type": "java.lang.Integer",
-      "description": "Description for testing.test."
-  }
-] }

@@ -1,4 +1,4 @@
-version: '3.1'
+version: '3.8'
 
 services:
   localstack:
@@ -8,17 +8,19 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=sqs,s3,lambda,apigateway,sts,cloudformation,ssm,iam,redshift,kms
+      - SERVICES=sqs,s3,lambda,apigateway,sts,cloudformation,ssm,iam,kms,cloudwatch,dynamodb,events
       - AWS_REGION=${AWS_REGION}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - HOSTNAME_EXTERNAL=${LOCALSTACK_HOST}
+      - LOCALSTACK_HOSTNAME=127.0.0.1
+      - LAMBDA_EXECUTOR=docker-reuse
       - DEBUG=1
       #      - DATA_DIR=/tmp/localstack/data # persist data
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     volumes:
-      - "./.localstack:/tmp/localstack"
+#      - "./.localstack:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
     healthcheck:
       test:

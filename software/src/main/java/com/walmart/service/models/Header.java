@@ -13,6 +13,8 @@ public final class Header {
     public static final String FILE_NAME = "file-name";
     // The content type of the request. In the case of UploadFile, this should be multipart/form-data.
     public static final String CONTENT_TYPE = "content-type";
+    // The token the request should continue from.
+    public static final String NEXT_TOKEN = "next-token";
 
     /**
      * Verifies that the specified headers are contained within the headers map passed in. Headers should be case-insensitive,

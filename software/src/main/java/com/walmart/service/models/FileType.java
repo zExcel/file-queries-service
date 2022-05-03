@@ -18,7 +18,7 @@ public enum FileType {
     static {
         valueToType = Arrays.stream(FileType.values()).collect(Collectors.toMap(FileType::toString, file -> file));
         fileTypes = Arrays.stream(FileType.values()).map(FileType::toString).collect(Collectors.toSet());
-        images = new HashSet<>(Arrays.asList(JPG.toString(), JPEG.toString(), PDF.toString()));
+        images = new HashSet<>(Arrays.asList(JPG.toString(), JPEG.toString(), PNG.toString()));
         applications = new HashSet<>(Arrays.asList(PDF.toString()));
     }
 
@@ -41,11 +41,19 @@ public enum FileType {
         return valueToType.get(fileType);
     }
 
+    public static String getMediaType(final FileType fileType) {
+        return getMediaType(fileType.toString());
+    }
+
     public static String getMediaType(final String fileType) {
+        System.out.println(images);
+        System.out.println(applications);
+        System.out.println(fileType);
+        System.out.println(applications.contains(fileType));
         if (images.contains(fileType)) {
             return "image";
         } else if(applications.contains(fileType)) {
-            return "applications";
+            return "application";
         }
         return "unknown";
     }

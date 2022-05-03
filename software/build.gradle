@@ -27,6 +27,7 @@ dependencies {
 	implementation 'com.amazonaws.serverless:aws-serverless-java-container-spring:1.8'
 	implementation 'com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.8'
 	implementation 'org.springframework.boot:spring-boot-starter-web:2.6.7'
+	implementation 'org.springframework:spring-web:5.3.19'
 
 	// Apache
 	implementation 'commons-codec:commons-codec:1.15'

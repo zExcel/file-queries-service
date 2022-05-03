@@ -1,36 +1,22 @@
 package com.walmart.service.util;
 
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.walmart.service.errors.ErrorCode;
 import com.walmart.service.errors.ValidationException;
 import com.walmart.service.models.FileType;
 import com.walmart.service.models.Header;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 public class RequestUtils {
 
-    /**
-     * Headers should be treated as being case-insensitive, but the Gateway API doesn't automatically handle this for us,
-     * so this utility function handles that for us.
-     * @param event The event received from the Gateway API.
-     * @return      A headers map where all the keys are now lowercase.
-     */
-    public static Map<String, String> transformEventHeaders(final APIGatewayProxyRequestEvent event) {
-        final Map<String, String> preTransformHeaders = event.getHeaders();
-        final Map<String, String> transformedHeaders = new HashMap<>();
-        for (final String header: preTransformHeaders.keySet()) {
-            final String value = preTransformHeaders.get(header);
-            transformedHeaders.put(header.toLowerCase(), value);
-        }
-        return transformedHeaders;
-    }
+    final static Logger logger = LoggerFactory.getLogger(RequestUtils.class);
 
-    private static FileType validateFileName(final String fileName) throws ValidationException {
+    public static FileType validateFileName(final String fileName) throws ValidationException {
         try {
-            System.out.println(fileName);
+            logger.debug("File name = {}", fileName);
             final String[] fileParts = fileName.split("\\.");
             final String fileType = fileParts[1];
             assert fileParts.length == 2;
@@ -42,17 +28,16 @@ public class RequestUtils {
         }
     }
 
-    public static String getFileType(final String fileName) throws ValidationException {
-        return validateFileName(fileName).toString();
+    public static FileType getFileType(final String fileName) throws ValidationException {
+        return validateFileName(fileName);
     }
 
     /**
      * Given a request, we validate the request and make sure it has the proper headers.
      *
-     * @param event The event that the Lambda receives from the Gateway API.
+     * @param headers The headers that the Lambda receives from the Gateway API.
      */
-    public static void validateRequest(final APIGatewayProxyRequestEvent event, final String... requiredHeaders) throws ValidationException {
-        final Map<String, String> headers = event.getHeaders();
+    public static void validateRequest(final Map<String, String> headers, final String... requiredHeaders) throws ValidationException {
         final ArrayList<String> missingHeaders = Header.validateHeadersExist(headers, requiredHeaders);
         if (!missingHeaders.isEmpty()) {
             throw new ValidationException(String.format("Upload File endpoint is missing required headers: %s", missingHeaders), ErrorCode.MISSING_REQUIRED_HEADER);

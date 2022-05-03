@@ -1,21 +1,21 @@
 package com.walmart.service.models;
 
-import com.google.gson.Gson;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.Data;
 
-import java.util.UUID;
+import java.time.Instant;
 
-@Getter
-@NoArgsConstructor
-@ToString
+@Data
 public class ListFilesRequest {
-    private final UUID requestId = UUID.randomUUID();
-    private final String nameContains = null;
-    private final String name = null;
+    public static String DEFAULT_CREATED_BEFORE = "2296-02-16T06:06:53.361255Z";
+    public static String DEFAULT_CREATED_AFTER = Instant.EPOCH.toString();
 
-    public static ListFilesRequest requestFromJson(final String json, final Gson gson) {
-        return gson.fromJson(json, ListFilesRequest.class);
+    private String createdBefore = DEFAULT_CREATED_BEFORE;
+    private String createdAfter = DEFAULT_CREATED_AFTER;
+    private String nameBeginsWith = null;
+    private int limit = 25;
+
+    public boolean datesAreDefault() {
+        return createdAfter.equals(DEFAULT_CREATED_AFTER) &&
+                createdBefore.equals(DEFAULT_CREATED_BEFORE);
     }
 }

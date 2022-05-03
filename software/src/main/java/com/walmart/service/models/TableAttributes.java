@@ -1,15 +1,19 @@
 package com.walmart.service.models;
 
-public final class Table {
-    // This is a unique id for a file.
-    public static final String FILE_UUID = "fileUUID";
+public final class TableAttributes {
+    public static final String FILE_NAME_INDEX_KEY = "FileNameIndex";
+    public static final String TIME_RANGE_INDEX_KEY = "TimeRangeIndex";
+    public static final String USER_ID_INDEX_KEY = "UserIdIndex";
 
-    // This is used for a global secondary index for easier querying capabilities. It is also the partition key
-    public static final String USER_ID = "userID";
+    // This is a unique id for a file. Used as the partition key in the table.
+    public static final String FILE_ID_KEY = "FileUUID";
 
-    // This is used as the sort key. Together with the USER_ID, they should uniquely identify a file.
-    public static final String FILE_NAME = "fileName";
+    // ID of the person who uploaded the file.
+    public static final String USER_ID_KEY = "UserID";
+
+    // Full name of the file that was upload (e.g. image.png).
+    public static final String FILE_NAME_KEY = "FileName";
 
     // The date in which the item was created, uses the ISO-8601 format.
-    public static final String CREATION_DATE = "createdAt";
+    public static final String CREATION_DATE_KEY = "CreatedAt";
 }

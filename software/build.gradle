@@ -1,23 +1,66 @@
 plugins {
+	// Spring
 	id 'org.springframework.boot' version '2.6.7'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+
+	// Shadow Jar Creation
+	id 'com.github.johnrengelman.shadow' version '7.1.2'
+
+	// Java
 	id 'java'
 }
 
-apply plugin: 'java'
-
-subprojects {
-	dependencies {
-		// AWS
-		implementation platform('software.amazon.awssdk:bom:2.15.0')
-		implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.1000')
-		implementation 'software.amazon.awssdk:lambda'
-		implementation 'software.amazon.awssdk:s3'
-		implementation 'com.amazonaws:aws-lambda-java-core:1.2.1'
-		implementation 'com.amazonaws:aws-lambda-java-events:3.11.0'
-
-		// Shadow Jar Creation
-		compileOnly "org.springframework.cloud:spring-cloud-function-adapter-aws:3.2.2"
+repositories {
+	maven {
+		url 'https://redshift-maven-repository.s3-website-us-east-1.amazonaws.com/release'
 	}
 }
+
+import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'java'
+apply plugin: 'application'
+mainClassName='com.walmart.service.LambdaApplication'
+
+dependencies {
+	// Spring
+	implementation 'com.amazonaws.serverless:aws-serverless-java-container-spring:1.8'
+	implementation 'com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.8'
+	implementation 'org.springframework.boot:spring-boot-starter-web:2.6.7'
+
+	// Apache
+	implementation 'commons-codec:commons-codec:1.15'
+	implementation 'commons-fileupload:commons-fileupload:1.4'
+	implementation 'org.apache.commons:commons-lang3:3.12.0'
+
+	// AWS
+	implementation platform('software.amazon.awssdk:bom:2.15.0')
+	implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.1000')
+	implementation 'software.amazon.awssdk:lambda'
+	implementation 'software.amazon.awssdk:dynamodb'
+	implementation 'software.amazon.awssdk:s3'
+	implementation 'com.amazonaws:aws-lambda-java-core:1.2.1'
+	implementation 'com.amazonaws:aws-lambda-java-events:3.11.0'
+
+	// Shadow Jar Creation
+	compileOnly "org.springframework.cloud:spring-cloud-function-adapter-aws:3.2.2"
+}
+
+shadowJar {
+
+	dependencies {
+		exclude("org.springframework.cloud:spring-cloud-function-web:3.0.0.BUILD-SNAPSHOT")
+	}
+
+	// Required for Spring
+	mergeServiceFiles()
+	append 'META-INF/spring.handlers'
+	append 'META-INF/spring.schemas'
+	append 'META-INF/spring.tooling'
+	transform(PropertiesFileTransformer) {
+		paths = ['META-INF/spring.factories']
+		mergeStrategy = "append"
+	}
+}
+assemble.dependsOn = [shadowJar]
 

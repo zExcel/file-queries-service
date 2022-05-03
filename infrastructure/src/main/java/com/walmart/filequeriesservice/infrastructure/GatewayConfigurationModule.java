@@ -2,20 +2,16 @@ package com.walmart.filequeriesservice.infrastructure;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
 @Getter
 public class GatewayConfigurationModule {
+    @Value("${service.environment}")
+    private String serviceEnvironment;
 
-    @Value("${redshift.dbName}")
-    private String redshiftDbName;
-
-    @Value("${redshift.username}")
-    private String redshiftUsername;
-
-    @Value("${redshift.password}")
-    private String redshiftPassword;
+    @Value("${ddb.tableName}")
+    private String tableName;
 
     @Value("${s3.bucketName}")
     private String s3BucketName;

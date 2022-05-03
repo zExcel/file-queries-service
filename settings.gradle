@@ -1,6 +1,3 @@
 rootProject.name = 'File Queries Service'
 include 'software'
-include 'software:GetFileFunction'
-include 'software:ListFilesFunction'
-include 'software:UploadFileFunction'
 include 'infrastructure'

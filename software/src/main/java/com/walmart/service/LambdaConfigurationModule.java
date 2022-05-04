@@ -15,4 +15,10 @@ public class LambdaConfigurationModule {
 
     @Value("${service.environment}")
     private String serviceEnvironment;
+
+    private final String localstackEndpoint;
+    public LambdaConfigurationModule(@Value("${service.localstack.endpointKey}") final String localstackKey) {
+        final String localstackEnv = System.getenv(localstackKey);
+        this.localstackEndpoint = localstackEnv != null ? localstackEnv : "http://localstack:4566";
+    }
 }

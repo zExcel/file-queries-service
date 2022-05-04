@@ -33,6 +33,7 @@ allprojects {
 	}
 	repositories {
 		mavenCentral()
+		mavenLocal()
 	}
 
 	configurations {
@@ -49,10 +50,12 @@ allprojects {
 		// Spring Boot
 		implementation 'org.springframework.boot:spring-boot-starter'
 		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+		testImplementation 'org.springframework:spring-test:5.3.19'
 
 		// JUnit
 		testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
 		testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+		testImplementation 'junit:junit:4.13.2'
 
 		// AWS
 		implementation platform('software.amazon.awssdk:bom:2.15.0')

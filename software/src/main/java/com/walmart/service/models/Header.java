@@ -12,7 +12,11 @@ public final class Header {
     // Name of the file to store the data under, must be of the format name.type where type == pdf, jpg, png, or jpeg
     public static final String FILE_NAME = "file-name";
     // The content type of the request. In the case of UploadFile, this should be multipart/form-data.
-    public static final String CONTENT_TYPE = "content-type";
+    public static final String CONTENT_TYPE = "Content-Type";
+    // The content type of the request. In the case of UploadFile, this should be multipart/form-data.
+    public static final String CONTENT_DISPOSITION = "Content-Disposition";
+    // The content type of the request. In the case of UploadFile, this should be multipart/form-data.
+    public static final String CONTENT_LENGTH = "Content-Length";
     // The token the request should continue from.
     public static final String NEXT_TOKEN = "next-token";
 

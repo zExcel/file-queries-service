@@ -10,24 +10,9 @@ public class ValidationException extends Exception {
 
     private final ArrayList<ErrorCode> errorCodes;
 
-    public ValidationException(final ErrorCode... errorCodes) {
-        super();
-        this.errorCodes =  new ArrayList<>(Arrays.asList(errorCodes));
-    }
-
     public ValidationException(final String message, final Throwable cause, final ErrorCode... errorCodes) {
         super(message, cause);
         this.errorCodes =  new ArrayList<>(Arrays.asList(errorCodes));
-    }
-
-    public ValidationException(final String message, final ErrorCode... errorCodes) {
-        super(message);
-        this.errorCodes =  new ArrayList<>(Arrays.asList(errorCodes));
-    }
-
-    public ValidationException(final Throwable cause, final ErrorCode... errorCodes) {
-        super(cause);
-        this.errorCodes = new ArrayList<>(Arrays.asList(errorCodes));
     }
 
     @Override

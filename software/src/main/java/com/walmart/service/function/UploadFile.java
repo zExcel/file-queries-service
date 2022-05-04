@@ -4,6 +4,8 @@ import com.walmart.service.LambdaConfigurationModule;
 import com.walmart.service.errors.ValidationException;
 import com.walmart.service.models.File;
 import com.walmart.service.models.FileType;
+import com.walmart.service.models.MultipleFilesResponse;
+import com.walmart.service.models.Pair;
 import com.walmart.service.util.DynamoDBUtil;
 import com.walmart.service.util.RequestUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -20,6 +22,7 @@ import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.*;
@@ -75,16 +78,13 @@ public class UploadFile {
         return fileId;
     }
 
-    @PostMapping(path = "/uploadFile/{userId}/{fileName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public File handleRequest(@RequestBody MultipartFile file,
-                              @PathVariable("userId") final String userId,
-                              @PathVariable("fileName") final String fileName) throws Exception {
-
+    public File uploadFile(final MultipartFile data,
+                           final String userId,
+                           final String fileName) throws Exception {
         try {
             final String creationDate = Instant.now().toString();
             RequestUtils.validateFileName(fileName);
-            this.uploadFileToS3(file.getInputStream(), file.getSize(), fileName, userId);
+            this.uploadFileToS3(data.getInputStream(), data.getSize(), fileName, userId);
             final String fileId = this.createDDBEntry(userId, fileName, creationDate);
 
             final File response = new File(fileName, fileId, userId, creationDate);
@@ -95,5 +95,25 @@ public class UploadFile {
             logger.error(ExceptionUtils.getStackTrace(e));
             throw e;
         }
+    }
+
+    @PostMapping(path = "/uploadFile/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public MultipleFilesResponse uploadMultipleFiles(@RequestBody List<MultipartFile> data,
+                                                     @PathVariable("userId") final String userId) {
+        final ArrayList<File> fileResponses = new ArrayList<>();
+        final ArrayList<Pair> failedFileNames = new ArrayList<>();
+        for (final MultipartFile file : data) {
+            String fileName = "Unknown";
+            try {
+                fileName = file.getOriginalFilename();
+                fileResponses.add(uploadFile(file, userId, fileName));
+            } catch (final Exception e) {
+                logger.error("ERROR: Failed to process the file = {}", fileName);
+                logger.error(ExceptionUtils.getStackTrace(e));
+                failedFileNames.add(new Pair(fileName, HttpServletResponse.SC_INTERNAL_SERVER_ERROR));
+            }
+        }
+        return new MultipleFilesResponse(fileResponses, failedFileNames);
     }
 }

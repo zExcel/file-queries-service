@@ -8,6 +8,9 @@ plugins {
 
 	// Java
 	id 'java'
+
+	// Code Coverage
+	id 'jacoco'
 }
 
 repositories {
@@ -17,9 +20,10 @@ repositories {
 }
 
 import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
+apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
-apply plugin: 'application'
+apply plugin: 'jacoco'
 mainClassName='com.walmart.service.LambdaApplication'
 
 dependencies {
@@ -64,4 +68,12 @@ shadowJar {
 	}
 }
 assemble.dependsOn = [shadowJar]
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.enabled true
+		csv.enabled true
+	}
+}
 

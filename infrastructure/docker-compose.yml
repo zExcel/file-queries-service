@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   localstack:
-    image: localstack/localstack
+    image: localstack/localstack:0.14.2
     container_name: localstack
     profiles: [ "localstack" ]
     ports:
@@ -22,13 +22,3 @@ services:
     volumes:
 #      - "./.localstack:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
-    healthcheck:
-      test:
-        - CMD
-        - bash
-        - -c
-        - awslocal s3 ls
-        - awslocal sqs list-queues
-      interval: 5s
-      timeout: 10s
-      retries: 10

@@ -46,10 +46,6 @@ public enum FileType {
     }
 
     public static String getMediaType(final String fileType) {
-        System.out.println(images);
-        System.out.println(applications);
-        System.out.println(fileType);
-        System.out.println(applications.contains(fileType));
         if (images.contains(fileType)) {
             return "image";
         } else if(applications.contains(fileType)) {

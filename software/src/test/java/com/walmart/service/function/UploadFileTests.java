@@ -1,55 +1,79 @@
 package com.walmart.service.function;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import com.amazonaws.services.lambda.runtime.LambdaRuntime;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.walmart.service.LambdaApplication;
 import com.walmart.service.LambdaConfigurationModule;
-import org.junit.jupiter.api.BeforeEach;
+import com.walmart.service.TestTypes;
+import com.walmart.service.models.File;
+import com.walmart.service.models.MultipleFilesResponse;
+import com.walmart.service.models.Pair;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.s3.S3Client;
+import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.util.List;
 
-@SpringBootTest
+import static java.lang.String.format;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest(classes = LambdaApplication.class)
+@AutoConfigureMockMvc
 @ContextConfiguration(classes = LambdaConfigurationModule.class)
-public class UploadFileTests {
-    final String fileName = "testing.png";
-    final String userId = "testing";
-    final Map<String, String> headers = new HashMap<>();
+public class UploadFileTests extends AbstractLambdaTest {
 
-    final String body = "testing";
-    final APIGatewayProxyRequestEvent requestEvent = new APIGatewayProxyRequestEvent()
-            .withBody(body);
+    public UploadFileTests() throws IOException {
+        super();
+    }
 
-    @MockBean
-    private S3Client s3Client;
-    @MockBean
-    private DynamoDbClient dynamoDbClient;
-    @Autowired
-    private LambdaConfigurationModule configurationModule;
-
-    final UploadFile uploadFileHandler = new UploadFile(configurationModule, s3Client, dynamoDbClient);
-    final Context mockedContext = Mockito.mock(Context.class);
-    final LambdaLogger lambdaLogger = LambdaRuntime.getLogger();
-
-    @BeforeEach
-    void initialize() {
-        headers.put("file-name", fileName);
-        headers.put("user-id", userId);
-        requestEvent.setHeaders(headers);
+    private boolean fileIsValid(final File file, final String fileName, final String userId) {
+        return file.getFileName().equals(fileName) &&
+                file.getOwnerID().equals(userId) &&
+                !file.getFileUUID().isEmpty() &&
+                !file.getCreationDate().isEmpty();
     }
 
     @Test
-    void handleRequestWorks() {
-        Mockito.when(mockedContext.getLogger()).thenReturn(lambdaLogger);
-//        uploadFileHandler.handleRequest(body, headers);
+    @Tag(TestTypes.INTEGRATION_TEST)
+    void uploadFileWorks() throws Exception {
+
+        final MvcResult uploadJpegResult = mockMvc.perform(multipart(format(UPLOAD_FILES_FORMAT,
+                                                                            TEST_USER_ID))
+                                                                   .file(jpegPayloadFile))
+                .andExpect(status().is(200))
+                .andReturn();
+        final MultipleFilesResponse uploadJpegFile = gson.fromJson(uploadJpegResult.getResponse().getContentAsString(), MultipleFilesResponse.class);
+        assertTrue(fileIsValid(uploadJpegFile.getSuccessfulFiles().get(0), JPEG_PAYLOAD_FILE_NAME, TEST_USER_ID));
+    }
+
+    @Test
+    @Tag(TestTypes.INTEGRATION_TEST)
+    void uploadMultipleFileWorks() throws Exception {
+
+        final MvcResult uploadJpegResult = mockMvc.perform(multipart(format(UPLOAD_FILES_FORMAT,
+                                                                            TEST_USER_ID))
+                                                                   .file(jpegPayloadFile)
+                                                                   .file(pngPayloadFile)
+                                                                   .file(pdfPayloadFile))
+                .andExpect(status().is(200))
+                .andReturn();
+        final MultipleFilesResponse multipleFilesResponse = gson.fromJson(uploadJpegResult.getResponse().getContentAsString(), MultipleFilesResponse.class);
+        final List<File> successfulUploads = multipleFilesResponse.getSuccessfulFiles();
+        final List<Pair> failedUploads = multipleFilesResponse.getFailedFiles();
+
+        assertTrue(failedUploads.isEmpty());
+        assertEquals(3, successfulUploads.size());
+
+        final File jpegFile = successfulUploads.get(0);
+        final File pngFile = successfulUploads.get(1);
+        final File pdfFile = successfulUploads.get(2);
+        assertTrue(fileIsValid(jpegFile, JPEG_PAYLOAD_FILE_NAME, TEST_USER_ID));
+        assertTrue(fileIsValid(pngFile, PNG_PAYLOAD_FILE_NAME, TEST_USER_ID));
+        assertTrue(fileIsValid(pdfFile, PDF_PAYLOAD_FILE_NAME, TEST_USER_ID));
     }
 }

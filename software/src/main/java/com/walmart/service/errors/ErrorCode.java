@@ -1,5 +1,8 @@
 package com.walmart.service.errors;
 
+import lombok.Getter;
+
+@Getter
 public enum ErrorCode {
     INTERNAL_SERVER_ERROR("Unexpected error when processing request", 500),
     MISSING_REQUIRED_HEADER("Missing Required Header", 400),
@@ -9,10 +12,6 @@ public enum ErrorCode {
     private final String errorCode;
     private final int statusCode;
 
-    ErrorCode(final String errorCode) {
-        this(errorCode, 500);
-    }
-
     ErrorCode(final String errorCode, final int statusCode) {
         this.errorCode = errorCode;
         this.statusCode = statusCode;
@@ -21,9 +20,5 @@ public enum ErrorCode {
     @Override
     public String toString() {
         return errorCode;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
     }
 }

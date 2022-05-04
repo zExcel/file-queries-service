@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,7 +66,13 @@ public class LambdaApplication {
     @Autowired
     public S3Client getS3Client(final LambdaConfigurationModule configurationModule) {
         if (configurationModule.getServiceEnvironment().equals("local")) {
-            return S3Client.builder().endpointOverride(URI.create("http://localstack:4566")).region(Region.US_EAST_1).build();
+            return S3Client.builder()
+                    .endpointOverride(URI.create(configurationModule.getLocalstackEndpoint()))
+                    .region(Region.US_EAST_1)
+                    .serviceConfiguration(S3Configuration.builder()
+                                                  .pathStyleAccessEnabled(true)
+                                                  .build())
+                    .build();
         } else {
             return S3Client.create();
         }
@@ -76,7 +83,7 @@ public class LambdaApplication {
     public DynamoDbClient getDynamoDbClient(final LambdaConfigurationModule configurationModule) {
         if (configurationModule.getServiceEnvironment().equals("local")) {
             return DynamoDbClient.builder()
-                    .endpointOverride(URI.create("http://localstack:4566"))
+                    .endpointOverride(URI.create(configurationModule.getLocalstackEndpoint()))
                     .region(Region.US_EAST_1)
                     .build();
         } else {

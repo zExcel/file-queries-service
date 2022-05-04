@@ -4,7 +4,8 @@ import com.walmart.service.LambdaApplication;
 import com.walmart.service.LambdaConfigurationModule;
 import com.walmart.service.TestTypes;
 import com.walmart.service.models.File;
-import com.walmart.service.models.UploadFilesResponse;
+import com.walmart.service.models.MultipleFilesResponse;
+import com.walmart.service.models.Pair;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,6 +17,8 @@ import java.io.IOException;
 import java.util.List;
 
 import static java.lang.String.format;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,8 +47,8 @@ public class UploadFileTests extends AbstractLambdaTest {
                                                                    .file(jpegPayloadFile))
                 .andExpect(status().is(200))
                 .andReturn();
-        final UploadFilesResponse uploadJpegFile = gson.fromJson(uploadJpegResult.getResponse().getContentAsString(), UploadFilesResponse.class);
-        assert fileIsValid(uploadJpegFile.getSuccessfulFiles().get(0), JPEG_PAYLOAD_FILE_NAME, TEST_USER_ID);
+        final MultipleFilesResponse uploadJpegFile = gson.fromJson(uploadJpegResult.getResponse().getContentAsString(), MultipleFilesResponse.class);
+        assertTrue(fileIsValid(uploadJpegFile.getSuccessfulFiles().get(0), JPEG_PAYLOAD_FILE_NAME, TEST_USER_ID));
     }
 
     @Test
@@ -59,18 +62,18 @@ public class UploadFileTests extends AbstractLambdaTest {
                                                                    .file(pdfPayloadFile))
                 .andExpect(status().is(200))
                 .andReturn();
-        final UploadFilesResponse uploadFilesResponse = gson.fromJson(uploadJpegResult.getResponse().getContentAsString(), UploadFilesResponse.class);
-        final List<File> successfulUploads = uploadFilesResponse.getSuccessfulFiles();
-        final List<String> failedUploads = uploadFilesResponse.getFailedFiles();
+        final MultipleFilesResponse multipleFilesResponse = gson.fromJson(uploadJpegResult.getResponse().getContentAsString(), MultipleFilesResponse.class);
+        final List<File> successfulUploads = multipleFilesResponse.getSuccessfulFiles();
+        final List<Pair> failedUploads = multipleFilesResponse.getFailedFiles();
 
-        assert failedUploads.isEmpty();
-        assert successfulUploads.size() == 3;
+        assertTrue(failedUploads.isEmpty());
+        assertEquals(3, successfulUploads.size());
 
         final File jpegFile = successfulUploads.get(0);
         final File pngFile = successfulUploads.get(1);
         final File pdfFile = successfulUploads.get(2);
-        assert fileIsValid(jpegFile, JPEG_PAYLOAD_FILE_NAME, TEST_USER_ID);
-        assert fileIsValid(pngFile, PNG_PAYLOAD_FILE_NAME, TEST_USER_ID);
-        assert fileIsValid(pdfFile, PDF_PAYLOAD_FILE_NAME, TEST_USER_ID);
+        assertTrue(fileIsValid(jpegFile, JPEG_PAYLOAD_FILE_NAME, TEST_USER_ID));
+        assertTrue(fileIsValid(pngFile, PNG_PAYLOAD_FILE_NAME, TEST_USER_ID));
+        assertTrue(fileIsValid(pdfFile, PDF_PAYLOAD_FILE_NAME, TEST_USER_ID));
     }
 }

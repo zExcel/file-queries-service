@@ -3,12 +3,9 @@ package com.walmart.service.util;
 import com.walmart.service.errors.ErrorCode;
 import com.walmart.service.errors.ValidationException;
 import com.walmart.service.models.FileType;
-import com.walmart.service.models.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Map;
 
 public class RequestUtils {
 
@@ -30,19 +27,5 @@ public class RequestUtils {
 
     public static FileType getFileType(final String fileName) throws ValidationException {
         return validateFileName(fileName);
-    }
-
-    /**
-     * Given a request, we validate the request and make sure it has the proper headers.
-     *
-     * @param headers The headers that the Lambda receives from the Gateway API.
-     */
-    public static void validateRequest(final Map<String, String> headers, final String... requiredHeaders) throws ValidationException {
-        final ArrayList<String> missingHeaders = Header.validateHeadersExist(headers, requiredHeaders);
-        if (!missingHeaders.isEmpty()) {
-            throw new ValidationException(String.format("Upload File endpoint is missing required headers: %s", missingHeaders), ErrorCode.MISSING_REQUIRED_HEADER);
-        }
-
-        validateFileName(headers.get(Header.FILE_NAME));
     }
 }

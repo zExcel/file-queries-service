@@ -3,7 +3,7 @@ package com.walmart.service.function;
 import com.walmart.service.LambdaApplication;
 import com.walmart.service.LambdaConfigurationModule;
 import com.walmart.service.TestTypes;
-import com.walmart.service.models.UploadFilesResponse;
+import com.walmart.service.models.MultipleFilesResponse;
 import org.junit.jupiter.api.*;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,9 +12,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import static java.lang.String.format;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,7 +39,7 @@ public class GetFileTests extends AbstractLambdaTest {
                                                             .file(pdfPayloadFile))
                 .andExpect(status().is(200))
                 .andReturn();
-        final UploadFilesResponse response = gson.fromJson(mvcResult.getResponse().getContentAsString(), UploadFilesResponse.class);
+        final MultipleFilesResponse response = gson.fromJson(mvcResult.getResponse().getContentAsString(), MultipleFilesResponse.class);
         jpegFileId = response.getSuccessfulFiles().get(0).getFileUUID();
     }
 
@@ -59,9 +59,9 @@ public class GetFileTests extends AbstractLambdaTest {
                 .andReturn()
                 .getResponse();
 
-        assert getJpegResult.getContentType().equals("image/jpeg");
-        assert getJpegResult.getContentLength() == jpegPayloadFile.getSize();
-        assert Arrays.equals(jpegPayloadFile.getBytes(), getJpegResult.getContentAsByteArray());
+        assertEquals("image/jpeg", getJpegResult.getContentType());
+        assertEquals(getJpegResult.getContentLength(), jpegPayloadFile.getSize());
+        Assertions.assertArrayEquals(jpegPayloadFile.getBytes(), getJpegResult.getContentAsByteArray());
     }
 
     @Test
@@ -74,9 +74,9 @@ public class GetFileTests extends AbstractLambdaTest {
                 .andReturn()
                 .getResponse();
 
-        assert getJpegResult.getContentType().equals("image/jpeg");
-        assert getJpegResult.getContentLength() == jpegPayloadFile.getSize();
-        assert Arrays.equals(jpegPayloadFile.getBytes(), getJpegResult.getContentAsByteArray());
+        assertEquals("image/jpeg", getJpegResult.getContentType());
+        assertEquals(getJpegResult.getContentLength(), jpegPayloadFile.getSize());
+        Assertions.assertArrayEquals(jpegPayloadFile.getBytes(), getJpegResult.getContentAsByteArray());
     }
 
 }

@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,6 +69,9 @@ public class LambdaApplication {
             return S3Client.builder()
                     .endpointOverride(URI.create(configurationModule.getLocalstackEndpoint()))
                     .region(Region.US_EAST_1)
+                    .serviceConfiguration(S3Configuration.builder()
+                                                  .pathStyleAccessEnabled(true)
+                                                  .build())
                     .build();
         } else {
             return S3Client.create();

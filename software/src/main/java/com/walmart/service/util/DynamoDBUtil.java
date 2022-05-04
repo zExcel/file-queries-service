@@ -4,11 +4,9 @@ import com.walmart.service.models.File;
 import com.walmart.service.models.TableAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
-import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
-import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
+import software.amazon.awssdk.services.dynamodb.model.*;
 
 import java.util.*;
 
@@ -40,6 +38,36 @@ public class DynamoDBUtil {
                         item.get(TableAttributes.CREATION_DATE_KEY).s());
     }
 
+    public static File getFileFromDDB(final String userId,
+                                      final String fileName,
+                                      final String tableName,
+                                      final DynamoDbClient dynamoDbClient) {
+        final String keyExpression = String.format("%s = %s and %s = %s",
+                                                   TableAttributes.FILE_NAME_KEY, ":name",
+                                                   TableAttributes.USER_ID_KEY, ":user");
+        final Map<String, AttributeValue> expressionAttributeValues = new HashMap<>();
+        expressionAttributeValues.put(":name", AttributeValue.builder().s(fileName).build());
+        expressionAttributeValues.put(":user", AttributeValue.builder().s(userId).build());
+
+        final QueryRequest queryRequest = QueryRequest.builder()
+                .keyConditionExpression(keyExpression)
+                .expressionAttributeValues(expressionAttributeValues)
+                .indexName(TableAttributes.FILE_NAME_INDEX_KEY)
+                .tableName(tableName)
+                .build();
+        final QueryResponse queryResponse = dynamoDbClient.query(queryRequest);
+        if (!queryResponse.hasItems() || queryResponse.items().isEmpty()) {
+            logger.warn("Was unable to find any items with file name = {} and user ID = {}", fileName, userId);
+            return new File();
+        }
+
+        final Map<String, AttributeValue> item = queryResponse.items().get(0);
+        return new File(item.get(TableAttributes.FILE_NAME_KEY).s(),
+                        item.get(TableAttributes.FILE_ID_KEY).s(),
+                        item.get(TableAttributes.USER_ID_KEY).s(),
+                        item.get(TableAttributes.CREATION_DATE_KEY).s());
+    }
+
     /**
      * DynamoDBs have an annoying feature when doing pagination for queries where the {@link QueryRequest#exclusiveStartKey()}
      * can only contain keys relevant to the index being used (e.g. the partition key, and any keys specified for the GSI).
@@ -60,7 +88,7 @@ public class DynamoDBUtil {
      *
      * @return The DDB representation of a file's info.
      */
-    public static Map<String, AttributeValue> createAttributeValueMap(final String fileId,
+    public static Map<String, AttributeValue> createAttributeValueMap(@NonNull final String fileId,
                                                                       final String userId,
                                                                       final String fileName,
                                                                       final String creationDate) {

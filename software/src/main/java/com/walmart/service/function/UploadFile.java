@@ -4,7 +4,8 @@ import com.walmart.service.LambdaConfigurationModule;
 import com.walmart.service.errors.ValidationException;
 import com.walmart.service.models.File;
 import com.walmart.service.models.FileType;
-import com.walmart.service.models.UploadFilesResponse;
+import com.walmart.service.models.MultipleFilesResponse;
+import com.walmart.service.models.Pair;
 import com.walmart.service.util.DynamoDBUtil;
 import com.walmart.service.util.RequestUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -21,6 +22,7 @@ import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.*;
@@ -97,11 +99,11 @@ public class UploadFile {
 
     @PostMapping(path = "/uploadFile/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public UploadFilesResponse uploadMultipleFiles(@RequestBody List<MultipartFile> data,
-                                                   @PathVariable("userId") final String userId) {
+    public MultipleFilesResponse uploadMultipleFiles(@RequestBody List<MultipartFile> data,
+                                                     @PathVariable("userId") final String userId) {
         final ArrayList<File> fileResponses = new ArrayList<>();
-        final ArrayList<String> failedFileNames = new ArrayList<>();
-        for (final MultipartFile file: data) {
+        final ArrayList<Pair> failedFileNames = new ArrayList<>();
+        for (final MultipartFile file : data) {
             String fileName = "Unknown";
             try {
                 fileName = file.getOriginalFilename();
@@ -109,9 +111,9 @@ public class UploadFile {
             } catch (final Exception e) {
                 logger.error("ERROR: Failed to process the file = {}", fileName);
                 logger.error(ExceptionUtils.getStackTrace(e));
-                failedFileNames.add(fileName);
+                failedFileNames.add(new Pair(fileName, HttpServletResponse.SC_INTERNAL_SERVER_ERROR));
             }
         }
-        return new UploadFilesResponse(fileResponses, failedFileNames);
+        return new MultipleFilesResponse(fileResponses, failedFileNames);
     }
 }

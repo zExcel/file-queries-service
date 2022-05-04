@@ -69,3 +69,11 @@ shadowJar {
 }
 assemble.dependsOn = [shadowJar]
 
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.enabled true
+		csv.enabled true
+	}
+}
+

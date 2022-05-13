@@ -70,10 +70,27 @@ shadowJar {
 assemble.dependsOn = [shadowJar]
 
 jacocoTestReport {
-	dependsOn test
 	reports {
 		xml.enabled true
 		csv.enabled true
 	}
 }
 
+task integrationTests(type: Test) {
+	useJUnitPlatform {
+		includeTags 'IntegrationTest'
+		excludeTags 'UnitTest'
+	}
+}
+
+task unitTests(type: Test) {
+	useJUnitPlatform {
+		includeTags 'UnitTest'
+		excludeTags 'IntegrationTest'
+	}
+}
+
+test {
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}

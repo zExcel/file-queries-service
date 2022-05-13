@@ -75,12 +75,18 @@ public class DynamoDBUtil {
      * @param attributeValueMap The original attribute map, probably created from {@link #createAttributeValueMap}
      * @param relevantKeys      The keys that are relevant to the index.
      */
-    public static void removeUnwantedKeys(final Map<String, AttributeValue> attributeValueMap,
+    public static Map<String, AttributeValue> removeUnwantedKeys(final Map<String, AttributeValue> attributeValueMap,
                                           final String... relevantKeys) {
         if (attributeValueMap == null) {
-            return;
+            return null;
         }
-        attributeValueMap.keySet().retainAll(new HashSet<>(Arrays.asList(relevantKeys)));
+        Map<String, AttributeValue> wantedKeys = new HashMap<>();
+        for (final String key: relevantKeys) {
+            if (attributeValueMap.containsKey(key)) {
+                wantedKeys.put(key, attributeValueMap.get(key));
+            }
+        }
+        return wantedKeys;
     }
 
     /**

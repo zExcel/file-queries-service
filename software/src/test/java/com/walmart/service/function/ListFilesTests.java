@@ -20,8 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -131,6 +130,48 @@ public class ListFilesTests extends AbstractLambdaTest {
         final List<String> fileIds = listFilesResponse.getFileIDs();
         assertTrue(fileIds.containsAll(Arrays.asList(jpegFileId, pngFileId, pdfFileId)));
         assertTrue(listFilesResponse.getNextToken() == null || listFilesResponse.getNextToken().isEmpty());
+    }
+
+    @Test
+    @Tag(TestTypes.INTEGRATION_TEST)
+    void listFilesWithPaginationTest() throws Exception {
+        // This will query by UserID, so all the files are candidates for return.
+        // With limit set to 1, it will only return 1 at a time.
+        final ListFilesRequest paginationRequest = ListFilesRequest.builder()
+                .limit(1)
+                .build();
+
+        final MockHttpServletResponse firstPaginationResponse =
+                mockMvc.perform(post(format(LIST_FILES_FORMAT,
+                                            TEST_USER_ID))
+                                        .header(Header.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                        .content(gson.toJson(paginationRequest)))
+                        .andExpect(status().is(200))
+                        .andReturn()
+                        .getResponse();
+
+
+        final ListFilesResponse firstListFilesResponse = gson.fromJson(firstPaginationResponse.getContentAsString(), ListFilesResponse.class);
+        final List<String> fileIds = firstListFilesResponse.getFileIDs();
+        assertEquals(1, fileIds.size());
+        assertTrue(firstListFilesResponse.getNextToken() != null && !firstListFilesResponse.getNextToken().isEmpty());
+
+        final MockHttpServletResponse secondPaginationResponse =
+                mockMvc.perform(post(format(LIST_FILES_FORMAT,
+                                            TEST_USER_ID))
+                                        .header(Header.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                        .header(Header.NEXT_TOKEN, firstListFilesResponse.getNextToken())
+                                        .content(gson.toJson(paginationRequest)))
+                        .andExpect(status().is(200))
+                        .andReturn()
+                        .getResponse();
+
+        final ListFilesResponse secondListFilesResponse = gson.fromJson(secondPaginationResponse.getContentAsString(), ListFilesResponse.class);
+        fileIds.addAll(secondListFilesResponse.getFileIDs());
+        assertEquals(2, fileIds.size());
+        assertTrue(secondListFilesResponse.getNextToken() != null && !secondListFilesResponse.getNextToken().isEmpty());
+
+        assertNotEquals(fileIds.get(0), fileIds.get(1));
     }
 
 }

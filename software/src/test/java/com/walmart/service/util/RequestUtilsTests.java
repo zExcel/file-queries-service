@@ -2,8 +2,10 @@ package com.walmart.service.util;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.walmart.service.LambdaApplication;
+import com.walmart.service.TestTypes;
 import com.walmart.service.errors.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -30,6 +32,7 @@ public class RequestUtilsTests {
     }
 
     @Test
+    @Tag(TestTypes.UNIT_TEST)
     void getFileTypeWorks() throws ValidationException {
         assert (RequestUtils.getFileType(fileName).toString().equals("png"));
     }

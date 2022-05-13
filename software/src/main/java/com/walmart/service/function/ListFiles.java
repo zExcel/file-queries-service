@@ -98,8 +98,10 @@ public class ListFiles {
     public ListFilesResponse queryByFileName(final ListFilesRequest listFilesRequest,
                                              final String userId,
                                              final Map<String, AttributeValue> lastEvaluatedKey) {
-        DynamoDBUtil.removeUnwantedKeys(lastEvaluatedKey, TableAttributes.FILE_NAME_KEY,
-                                        TableAttributes.USER_ID_KEY, TableAttributes.FILE_ID_KEY);
+        final Map<String, AttributeValue> lastEvaluatedKeyFiltered = DynamoDBUtil.removeUnwantedKeys(lastEvaluatedKey,
+                                                                                                     TableAttributes.FILE_NAME_KEY,
+                                                                                                     TableAttributes.USER_ID_KEY,
+                                                                                                     TableAttributes.FILE_ID_KEY);
         final String keyExpression = String.format("begins_with (%s, %s) and %s = %s",
                                                    TableAttributes.FILE_NAME_KEY, ":name",
                                                    TableAttributes.USER_ID_KEY, ":user");
@@ -116,7 +118,7 @@ public class ListFiles {
                 .filterExpression(filterExpression)
                 .expressionAttributeValues(expressionAttributeValues)
                 .limit(listFilesRequest.getLimit())
-                .exclusiveStartKey(lastEvaluatedKey)
+                .exclusiveStartKey(lastEvaluatedKeyFiltered)
                 .indexName(TableAttributes.FILE_NAME_INDEX_KEY)
                 .tableName(tableName)
                 .build();
@@ -134,8 +136,11 @@ public class ListFiles {
     public ListFilesResponse queryByTimeRange(final ListFilesRequest listFilesRequest,
                                               final String userId,
                                               final Map<String, AttributeValue> lastEvaluatedKey) {
-        DynamoDBUtil.removeUnwantedKeys(lastEvaluatedKey, TableAttributes.CREATION_DATE_KEY,
-                                        TableAttributes.USER_ID_KEY, TableAttributes.FILE_ID_KEY);
+
+        final Map<String, AttributeValue> lastEvaluatedKeyFiltered = DynamoDBUtil.removeUnwantedKeys(lastEvaluatedKey,
+                                                                                                     TableAttributes.CREATION_DATE_KEY,
+                                                                                                     TableAttributes.USER_ID_KEY,
+                                                                                                     TableAttributes.FILE_ID_KEY);
         final String keyExpression = String.format("%s BETWEEN %s AND %s and %s = %s",
                                                    TableAttributes.CREATION_DATE_KEY, ":dateAfter", ":dateBefore",
                                                    TableAttributes.USER_ID_KEY, ":user");
@@ -148,7 +153,7 @@ public class ListFiles {
                 .keyConditionExpression(keyExpression)
                 .expressionAttributeValues(expressionAttributeValues)
                 .limit(listFilesRequest.getLimit())
-                .exclusiveStartKey(lastEvaluatedKey)
+                .exclusiveStartKey(lastEvaluatedKeyFiltered)
                 .indexName(TableAttributes.TIME_RANGE_INDEX_KEY)
                 .tableName(tableName)
                 .build();
@@ -166,7 +171,10 @@ public class ListFiles {
     public ListFilesResponse queryByUser(final String userId,
                                          int limit,
                                          final Map<String, AttributeValue> lastEvaluatedKey) {
-        DynamoDBUtil.removeUnwantedKeys(lastEvaluatedKey, TableAttributes.USER_ID_KEY, TableAttributes.FILE_ID_KEY);
+
+        final Map<String, AttributeValue> lastEvaluatedKeyFiltered = DynamoDBUtil.removeUnwantedKeys(lastEvaluatedKey,
+                                                                                                     TableAttributes.USER_ID_KEY,
+                                                                                                     TableAttributes.FILE_ID_KEY);
         final String keyExpression = String.format("%s = %s", TableAttributes.USER_ID_KEY, ":user");
         final Map<String, AttributeValue> expressionAttributeValues = new HashMap<>();
         expressionAttributeValues.put(":user", AttributeValue.builder().s(userId).build());
@@ -175,7 +183,7 @@ public class ListFiles {
                 .keyConditionExpression(keyExpression)
                 .expressionAttributeValues(expressionAttributeValues)
                 .limit(limit)
-                .exclusiveStartKey(lastEvaluatedKey)
+                .exclusiveStartKey(lastEvaluatedKeyFiltered)
                 .indexName(TableAttributes.USER_ID_INDEX_KEY)
                 .tableName(tableName)
                 .build();
@@ -189,7 +197,7 @@ public class ListFiles {
                                            @RequestHeader(required = false, name = Header.NEXT_TOKEN) final String nextToken) {
 
         final Map<String, AttributeValue> lastEvaluatedKey = getLastEvalutedKeyItem(nextToken);
-        logger.info("Last Evaluated Key = {}", lastEvaluatedKey);
+        logger.debug("Last Evaluated Key = {}", lastEvaluatedKey);
         try {
             final ListFilesResponse result;
             if (listFilesRequest.getNameBeginsWith() != null) {
@@ -200,7 +208,7 @@ public class ListFiles {
                 result = queryByUser(userId, listFilesRequest.getLimit(), lastEvaluatedKey);
             }
 
-            logger.info("List Files Result = {}", result);
+            logger.debug("List Files Result = {}", result);
             return result;
         } catch (final Exception e) {
             logger.error("Received an exception while processing {}", listFilesRequest, e);

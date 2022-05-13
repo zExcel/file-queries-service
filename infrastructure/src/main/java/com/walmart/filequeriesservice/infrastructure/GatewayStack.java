@@ -1,5 +1,6 @@
 package com.walmart.filequeriesservice.infrastructure;
 
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.walmart.filequeriesservice.util.EnvironmentKeys;
 import software.amazon.awscdk.*;
 import software.amazon.awscdk.services.apigateway.LambdaRestApi;
@@ -7,7 +8,7 @@ import software.amazon.awscdk.services.apigateway.RestApi;
 import software.amazon.awscdk.services.dynamodb.*;
 import software.amazon.awscdk.services.events.Rule;
 import software.amazon.awscdk.services.events.Schedule;
-import software.amazon.awscdk.services.events.targets.ApiGateway;
+import software.amazon.awscdk.services.events.targets.LambdaFunction;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.lambda.Runtime;
@@ -104,9 +105,6 @@ public class GatewayStack extends Stack {
         final Table queriesTable = createTable();
 
         final Function functionHandler = createFunction("FunctionHandler", bucket, queriesTable);
-        final Rule functionWarmerRule = Rule.Builder.create(this, "FunctionWarmer")
-                .schedule(Schedule.rate(Duration.minutes(1)))
-                .build();
         queriesTable.grantReadWriteData(functionHandler.getRole());
 
         final RestApi api = LambdaRestApi.Builder.create(this, "FileQueries-API")
@@ -117,10 +115,11 @@ public class GatewayStack extends Stack {
                 .binaryMediaTypes(singletonList("multipart/form-data"))
                 .build();
 
-        functionWarmerRule.addTarget(ApiGateway.Builder.create(api)
-                                             .method("GET")
-                                             .stage(api.getDeploymentStage().getStageName())
-                                             .build());
+        final Rule functionWarmerRule = Rule.Builder.create(this, "FunctionWarmer")
+                .schedule(Schedule.rate(Duration.minutes(1)))
+                .build();
+
+        functionWarmerRule.addTarget(LambdaFunction.Builder.create(functionHandler).build());
 
     }
 }

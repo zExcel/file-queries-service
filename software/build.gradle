@@ -76,10 +76,6 @@ jacocoTestReport {
 	}
 }
 
-tasks.withType(Test) {
-	finalizedBy jacocoTestReport
-}
-
 task integrationTests(type: Test) {
 	useJUnitPlatform {
 		includeTags 'IntegrationTest'
@@ -96,4 +92,5 @@ task unitTests(type: Test) {
 
 test {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
 }
